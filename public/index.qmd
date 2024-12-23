@@ -1,0 +1,187 @@
+---
+title: "Formation statistiques bayésiennes"
+subtitle: "CRNL, décembre 2024"
+author: "Oussama Abdoun"
+format: 
+  html:
+    toc: true
+    link-external-newwindow: true
+    theme: cosmo
+    
+editor: visual
+bibliography: references.bib
+csl: apa-cv.csl
+suppress-bibliography: true
+link-citations: false
+citations-hover: false
+---
+
+## Documents du cours
+
+### Télécharger
+
+Tous les fichiers (\~50mb):
+
+Part 1: Classical / frequentist statistics \[[pdf](#0)\] \[[code](#0)\]\
+Part 2: Core concepts & parameter estimation \[[pdf](#0)\] \[[code](#0)\]\
+Part 3: Hypothesis testing \[[pdf](#0)\] \[[code](#0)\]\
+Part 4: Performance, model evaluation, reporting \[[pdf](#0)\] \[[code](#0)\]
+
+Practice in R: \[html\] \[[code](#0)\]
+
+### Historique des modifications
+
+#### 2024-12-23
+
+-   part 4: added a reference to optional stopping with the criterion of interval precision
+-   part 3: added an interpretation of the Bayes Factor (slide #16)
+-   part 3: added a visualization of the calculation of Bayes Factor (slide #18)
+-   part 3: added a slide on posterior model probabilities when there are more than 2 models (slide #27)
+-   part 3: added slides onBayesian Model Averaging and the BF of inclusion (slides #28-29)
+
+#### 2024-12-10
+
+-   part 3: added a visualization of the convergence of MCMC towards the posterior distribution (slide #4) and the stability of credibility intervals (slide #6)
+-   part 2: added a quote on subjectivity in statistics (slide #49)
+
+## Ressources recommandées
+
+Ces listes reprennent partiellement, et les complète, les références mentionnées dans les diapositives.
+
+Dans chaque liste, les ressources/références sont présentées dans un **ordre approximativement croissant de technicité** : il est donc très recommandé de les lire dans l'ordre, en acceptant qu'il faille quelques temps (années ?) de pratique avant de pouvoir aborder les plus exigeantes.
+
+::: panel-tabset
+## Background information
+
+**Analyses critiques du paradigme fréquentiste :**
+
+-   @nuzzo2014
+
+-   @gigerenzer2004
+
+-   @perezgonzalez2015
+
+**Biais de publication, prévalence et impact :**
+
+-   **en psychologie :** @scheel2021
+
+-   **dans les essais controlés randomisés :** @dwan2008
+
+**Tailles d'effet dans la littérature :**
+
+-   **corrélations intra-sujets en psychologie :** @gignac2016
+
+-   **en neuroscience cognitives :** @szucs2017
+
+-   **par discipline :** @schäfer2019
+
+## Introductions générales aux statistiques bayésiennes
+
+**Articles :**
+
+-   @dienes2014
+
+-   @etz2018
+
+-   @heck2023
+
+-   @kruschke2017
+
+**Livres** (tous accessibles gratuitement en ligne) :
+
+-   @nicenboim2021
+
+-   @kruschke2014 [[pdf](https://nyu-cdsc.github.io/learningr/assets/kruschke_bayesian_in_R.pdf "Doing Bayesian data analysis")]
+
+-   @gelman2020 [[pdf](http://www.stat.columbia.edu/~gelman/book/BDA3.pdf "Bayesian Data Analysis")]
+
+**Blogs** d'experts influents en statistiques appliquées :
+
+-   [Daniel Lakens](https://daniellakens.blogspot.com "The 20% Statistician")
+
+-   [John Kruschke](https://doingbayesiandataanalysis.blogspot.com "Doing Bayesian data analysis")
+
+-   [Andrew Gelman](https://statmodeling.stat.columbia.edu/category/bayesian-statistics/ "Statistical Modeling, Causal Inference, and Social Science")
+
+## Élicitation des prior
+
+-   @johnson2010
+
+-   @gosling2018
+
+-   @mikkola2024
+
+## Inférences bayésiennes
+
+**Basée sur le ROPE et la distribution postérieure :**
+
+-   @kruschke2018
+
+**Basée sur le Bayes Factor :**
+
+-   @dienes2016
+
+-   @morey2016
+
+-   @rouder2009
+
+-   @morey2011
+
+## Bonnes pratiques
+
+**Publication et interprétation des analyses bayésiennes :**
+
+-   @kruschke2021
+
+-   @tendeiro2024
+
+**Workflows avancés :**
+
+-   @gabry2019
+
+-   @schad2021
+
+## JASP
+
+-   **documentation officielle** : @goss-sampson2020
+
+<!-- -->
+
+-   **tutoriels :**
+
+    -   @faulkenberry2020
+
+    -   @WagenmakersLMJ2018
+
+## R
+
+-   **documentation du package `{BayesFactor}` :** [lien](https://cran.r-project.org/web/packages/BayesFactor/vignettes/manual.html "Using the ‘BayesFactor’ package, version 0.9.2+")
+
+-   **ressources pour `{rstanarm}` :**
+
+    -   tutoriels : [ici](https://cran.r-project.org/web/packages/rstanarm/vignettes/rstanarm.html "How to Use the rstanarm Package") et @muth2018
+
+    -   spécification des priors : [lien](https://mc-stan.org/rstanarm/articles/priors.html "Prior Distributions for rstanarm Models")
+
+    -   diagnostics de MCMC : [lien](https://mc-stan.org/bayesplot/articles/visual-mcmc-diagnostics.html#general-mcmc-diagnostics "Visual MCMC diagnostics using the bayesplot package")
+
+-   **documentation de `{bayestestr}` :**
+
+    -   [vignettes](https://easystats.github.io/bayestestR/articles/)
+
+    -   contrastes *post hoc* : [lien](https://easystats.github.io/blog/posts/bayestestr_emmeans/ "Testing Contrasts from Bayesian Models with 'emmeans' and 'bayestestR'")
+:::
+
+## Remerciements
+
+-   **Anne Cheylus** pour l'initiative de ce cours et toute son organisation de A à Z !
+
+-   la **direction du CRNL**, et en particulier Anne-Marie Helle, pour leur soutien administratif et financier
+
+-   **Romain Bouet** pour son accompagnement dans mes premiers pas en statistiques en 2015-2017, et pour les innombrables conversations statistiques (ou pas) qui ont alimenté ma réflexion depuis
+
+## Contact
+
+N'hésitez pas à me contacter si vous trouvez des erreurs dans les slides, souhaitez organiser d'autres formations, etc.
+
+oussama \[dot\] abdoun (\@) pm \[dot\] com

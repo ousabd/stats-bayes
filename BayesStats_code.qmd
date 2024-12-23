@@ -1,0 +1,564 @@
+---
+title: "Bayesian statistics"
+subtitle: "CRNL, décembre 2024"
+author: "Oussama Abdoun"
+format: 
+  html:
+    toc: true
+    theme: cosmo
+    
+editor: visual
+---
+
+# Prepare 
+
+## Libraries
+
+```{r}
+library(logspline) # needed for `bayestestR::si()`
+library(bayestestR) # for visualization of posterior distribution and its derivatives
+library(tidyverse)
+
+theme_set(theme_minimal())
+theme_update(strip.text = element_text(size = 12),
+      panel.spacing = unit(0.3,"in"))
+```
+
+
+## Functions
+
+```{r}
+posterior_beta <- function(alpha, beta, n, k, ndraws = 10000) {
+  return(distribution_beta(10000, alpha+k, beta+n-k))
+}
+```
+
+# Bayesian inference: planarian growth/shrinking example
+
+## Likelihood
+```{r}
+#| fig-width: 5
+#| fig-height: 5
+
+# True population values
+true_mean = 2
+true_sd = 3
+
+# Imagine we measure n planarians
+n = 50
+sample = rnorm(n, true_mean, true_sd)
+sample_mean = mean(sample)
+cat("Sample mean =", round(sample_mean,2), "mm")
+
+mu = seq(-10,10,.1)
+scaling = 1/(n+1) # this allows the likelihood to behave like a pdf, i.e. integrate to 1
+
+
+# Calculate the *likelihood function* of the data for all possible values of µ
+pdf <- vector("numeric", length(mu)); i = 1
+for (m in mu) {
+  pdf[i] = prod(dnorm(sample, mean = m, sd = true_sd)); i = i + 1
+}
+df.likelihood = data.frame(mu = mu,
+                           likelihood = pdf/(sum(pdf)*(mu[2]-mu[1])))
+
+
+# Let's visualize the likelihood
+ggplot(df.likelihood, aes(y = likelihood, x = mu)) +
+geom_vline(xintercept = 0, linetype = 2, color = "grey50") +
+geom_line(color = "red") +
+scale_x_continuous(breaks = scales::pretty_breaks(10)) +
+labs(x = "Population growth in space, in mm (µ)", y = "p(x|µ)", title = "Likelihood (of the observed data)")
+```
+
+
+## Normal prior
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+mu = seq(-10,10,.1)
+df.prior = data.frame(mu = rep(mu,3),
+                      prior = c(dnorm(mu,0,10000), dnorm(mu,0,5), dnorm(mu,0,1)),
+                      scenario = c(rep("A",length(mu)), rep("B",length(mu)), rep("C",length(mu))))
+
+scenario.labels = c("A"="(A) the frequentist approach", "B"="(B) physical constraint", "C"="(C) biological constraint")
+
+ggplot(df.prior, aes(y = prior, x = mu)) +
+facet_wrap(~ scenario, labeller = labeller(scenario = scenario.labels)) +
+geom_vline(xintercept = 0, linetype = 2, color = "grey50") +
+geom_line(color = "deepskyblue") +
+scale_x_continuous(breaks = scales::pretty_breaks(10)) +
+labs(x = "Population growth in space, in mm (µ)", y = "p(µ)", title = "Prior belief p(µ)")
+```
+
+## Posterior
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+# Finally, we can combine the likelihood and prior under each of the 3 scenarios and obtain 
+# the corresponding posterior beliefs
+
+posterior_mean <- function(prior_sd) {
+  return(posterior_sd(prior_sd)*(n/(true_sd^2)*sample_mean))
+}
+
+posterior_sd <- function(prior_sd) {
+  return(1/(1/prior_sd^2 + n/(true_sd^2)))
+}
+
+# Calculate the posterior
+mu = seq(-10,10,.1)
+df.posterior = data.frame(mu = rep(mu,3),
+                          posterior = c(dnorm(mu, posterior_mean(10000), posterior_sd(1000)),
+                                        dnorm(mu, posterior_mean(5), posterior_sd(5)),
+                                        dnorm(mu, posterior_mean(1), posterior_sd(1))),
+                          scenario = c(rep("A",length(mu)), rep("B",length(mu)), rep("C",length(mu))))
+
+# Join all distributions in a signle dataframe for convenience
+df.all <- df.prior %>% full_join(df.posterior) %>% full_join(df.likelihood) %>% 
+    gather(key = distribution, value = pdf, prior,likelihood,posterior) #%>% 
+  # mutate(distribution = factor(distribution, levels = c("likelihood","prior","posterior")))
+
+
+# Plot
+ggplot(df.all, aes(x = mu, y = pdf, color = distribution)) +
+facet_wrap(~ scenario, labeller = labeller(scenario = scenario.labels)) +
+geom_vline(xintercept = 0, linetype = 2, color = "grey50") +
+geom_line() +
+scale_x_continuous(breaks = scales::pretty_breaks(10)) +
+labs(x = "Population growth in space, in mm (µ)", y = "PDF") +
+theme(legend.position = "bottom")
+```
+
+# Bayesian inference: coin toss example
+
+## Likelihood
+
+```{r}
+#| fig-width: 5
+#| fig-height: 5
+
+# Now imagine we toss the coin 50 times and get 38 heads
+n = 50
+k = 40
+
+x = seq(0,1,.01)
+scaling = 1/(n+1) # this allows the likelihood to behave like a pdf, i.e. integrate to 1
+
+# Let's visualize the *likelihood function* of the data for all possible values of q
+df.likelihood = data.frame(x = x,
+                           likelihood = dbinom(k, n, x)/scaling)
+
+options(repr.plot.width = 3, repr.plot.height = 3)
+
+ggplot(df.likelihood, aes(y = likelihood, x = x)) +
+geom_vline(xintercept = .5, linetype = 2, color = "grey50") +
+geom_line(color = "red") +
+scale_x_continuous(breaks = seq(0,1,0.1)) +
+labs(x = "Probability of 'heads' (q)", y = "p(k|q)", title = "Likelihood (of the observed data)")
+```
+
+
+## Beta prior
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+# Imagine you have a coin and want to assess how (un)fair it is.
+# Even before you test it, you hold some (implicit) belief about it. Imagine 3 different scenarios:
+# (A) You found the coin in your pocket, it's a regular one, you have a strong expectation that it's fair.
+# (B) It's an ancient coin made bulkier on the heads side. Therefore you expect it might be slightly biased towards tails
+# (C) You have been handed the coin by a magician to check it's normal. It does look normal, but you suspect it's a rigged one, heavily biased towards one side or the other, only you don't know which one.
+
+# Let's represent your prior belief as a Beta distribution over q, the probability of the coin landing heads,
+# under the 2 different scenarios
+x = seq(0,1,.01)
+df.prior = data.frame(x = rep(x,3),
+                      prior = c(dbeta(x,20,20), dbeta(x,20,6), dbeta(x,0.5,0.5)),
+                      scenario = c(rep("A",length(x)),rep("B",length(x)),rep("C",length(x))))
+
+scenario.labels = c("A"="(A) regular coin", "B"="(B) ancient coin", "C"="(C) magician coin")
+
+ggplot(df.prior, aes(y = prior, x = x)) +
+facet_wrap(~ scenario, labeller = labeller(scenario = scenario.labels)) +
+geom_vline(xintercept = .5, linetype = 2, color = "grey50") +
+geom_line(color = "deepskyblue") +
+scale_x_continuous(breaks = seq(0,1,0.2)) +
+labs(x = "Probability of 'heads' (q)", y = "p(q)", title = "Prior belief p(q)")
+```
+
+
+## Posterior
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+# Finally, we can combine the likelihood and prior under each of the 3 scenarios and obtain 
+# the corresponding posterior beliefs
+
+# Calculate the posterior
+df.posterior = data.frame(x = rep(x,3),
+                          posterior = c(dbeta(x,20+k,20+n-k), dbeta(x,20+k,6+n-k), dbeta(x,0.5+k,0.5+n-k)),
+                          scenario = c(rep("A",length(x)),rep("B",length(x)),rep("C",length(x))))
+
+# Join all distributions in a signle dataframe for convenience
+df.all <- df.prior %>% full_join(df.posterior) %>% full_join(df.likelihood) %>% 
+    gather(key = distrib, value = pdf, prior,likelihood,posterior)
+
+
+# Plot
+ggplot(df.all, aes(x = x, y = pdf, color = distrib)) +
+facet_wrap(~ scenario, labeller = labeller(scenario = scenario.labels)) +
+geom_vline(xintercept = .5, linetype = 2, color = "grey50") +
+geom_line() +
+scale_x_continuous(breaks = seq(0,1,0.2)) +
+labs(x = "Probability of 'heads'", y = "PDF") +
+theme(legend.position = "bottom")
+```
+
+## Point estimates
+
+```{r}
+n = 5
+k = 4
+
+# Scenario A (regular coin)
+point_estimate(distribution_beta(100, 20+k,20+n-k)) %T>%
+  print() %>% plot() 
+```
+
+```{r}
+n = 5
+k = 4
+
+# Scenario B (ancient coin)
+point_estimate(distribution_beta(100, 20+k,6+n-k)) %T>% 
+  print() %>%
+  plot() + scale_x_continuous(breaks = seq(0,1,0.1))
+```
+
+```{r}
+n = 5
+k = 4
+
+# Scenario C (magician coin)
+point_estimate(distribution_beta(10000, 0.5+k,0.5+n-k)) %T>% print() %>% plot() + scale_x_continuous(breaks = seq(0,1,0.1))
+```
+
+## Credible intervals
+See https://easystats.github.io/bayestestR/articles/credible_interval.html
+
+```{r}
+n = 5
+k = 4
+
+# Scenario C (magician coin)
+posterior = distribution_beta(10000, 0.5+k, 0.5+n-k)
+ci = hdi(posterior, ci = c(0.90,0.95)) 
+ci
+plot(ci) + geom_vline(xintercept=.5) + scale_x_continuous(breaks = seq(0,1,0.1))
+
+ci = eti(posterior, ci =c(0.90,0.95)) 
+ci
+plot(ci) + geom_vline(xintercept=.5) + scale_x_continuous(breaks = seq(0,1,0.1))
+```
+
+
+### 95% or 90%?
+
+```{r, fig.width = 5, fig.height=3}
+n = 5
+k = 4
+
+# Scenario C (magician coin)
+posterior = distribution_beta(5000, 20+k, 20+n-k)
+ci = hdi(posterior, ci = c(0.95,0.9)) 
+ci
+plot(ci) + geom_vline(xintercept=.5) + scale_x_continuous(breaks = seq(0,1,0.1))
+
+```
+
+
+## Describe posteriors
+
+```{r}
+describe_posterior(distribution_beta(100, 20+k,5+n-k))
+```
+
+
+# Bayesian hypothesis testing
+
+## Based on the posterior
+
+### Exact hypothesis
+
+```{r}
+## Scenario A (regular coin)
+
+# Posterior
+posterior = posterior_beta(alpha = 20, beta = 20, n = 5, k = 4)
+plot(hdi(posterior)) + geom_vline(xintercept = 0.5, linetype = 2) + expand_limits(x = c(0,1))
+
+# Point null
+p_pointnull(posterior, null = 0.5)
+```
+
+```{r}
+# Scenario B (ancient coin)
+posterior = posterior_beta(alpha = 20, beta = 6, n = 5, k = 4)
+plot(hdi(posterior)) + geom_vline(xintercept = 0.5, linetype = 2) + expand_limits(x = c(0,1))
+
+p_map(posterior, null = 0.5) # p_map() is an alias for p_pointnull()
+```
+
+```{r}
+# Scenario C (magician's coin)
+posterior = posterior_beta(alpha = 0.5, beta = 0.5, n = 5, k = 4)
+
+plot(hdi(posterior)) + geom_vline(xintercept = 0.5, linetype = 2) + expand_limits(x = c(0,1))
+
+p_map(posterior, null = 0.5) # p_map() is an alias for p_pointnull()
+```
+
+### Range hypothesis
+
+#### Direction of effect
+Empirically, this is highly correlated to the frequentist p-value (see https://easystats.github.io/bayestestR/articles/probability_of_direction.html)
+
+```{r}
+# Scenario A (regular coin)
+posterior <-  posterior_beta(alpha = 20, beta = 20, n = 50, k = 40)
+
+p_direction(posterior-0.5, null=0)
+```
+
+#### Regions of practical equivalence (ROPE)
+See https://easystats.github.io/bayestestR/articles/region_of_practical_equivalence.html
+
+*"The null hypothesis is rejected or accepted if the percentage of the posterior within the ROPE is smaller than 2.5% or greater than 97.5% (...) Else, it’s unclear whether the null hypothesis should be accepted or rejected."*
+
+```{r}
+posterior <- posterior_beta(alpha = 20, beta = 20, n = 5, k = 4)
+
+rope(posterior, range = c(.45,.55), ci=1) %T>%
+    print() %>%
+    plot() + expand_limits(x=c(0,1))
+
+# The ROPE is included in or overlapping with the CI => we can't conclude
+```
+
+
+```{r}
+posterior = posterior_beta(alpha = 20, beta = 20, n = 50, k = 40)
+
+rope(posterior, range = c(.45,.55), ci = c(1,.95)) %T>%
+    print() %>%
+    plot() + expand_limits(x=c(0,1))
+
+# Very little "belief" is included in the ROPE, so we can REJECT the null hypothesis for all practical purposes
+```
+
+```{r}
+posterior = posterior_beta(alpha = 20, beta = 20, n = 500, k = 250)
+
+rope(posterior, range = c(.45,.55), ci=1) %T>%
+    print() %>%
+    plot() + expand_limits(x=c(0,1))
+
+# So much "belief" is included in the ROPE that we can ACCEPT the null hypothesis for all practical purposes
+```
+
+
+
+### Two-sample location test (with BayesianFirstAid)
+
+```{r}
+library(BayesianFirstAid)
+```
+
+```{r}
+groupA <- rnorm(30, mean = 15, sd = 2)
+groupB <- rnorm(30, mean = 15.8, sd = 2)
+# => absolute difference = 0.8, cohen's d= 0.4
+
+t.test(groupA, groupB)
+
+bayes.t.test(groupA, groupB) -> m.bayes.t
+
+m.bayes.t
+summary(m.bayes.t)
+plot(m.bayes.t)
+```
+
+### Correlation (with BayesianFirstAid)
+
+```{r}
+library(BayesianFirstAid)
+```
+
+```{r}
+# Create data
+n <- 50
+x = rnorm(n, 0, 1)
+y = 4 + x + rnorm(50, 0, 2)
+
+plot(x,y)
+```
+
+```{r}
+bct <- bayes.cor.test(x,y)
+bct
+```
+
+Compare with the frequentist correlation:
+```{r}
+cor.test(x,y)
+```
+
+We can inspect the results in detail:
+```{r}
+summary(bct)
+```
+
+
+```{r}
+plot(bct)
+```
+
+### Linear model (with rstanarm)
+
+```{r}
+head(iris)
+```
+
+```{r}
+options(repr.plot.width = 4, repr.plot.height = 3)
+
+ggplot(iris, aes(x=Petal.Length, y=Sepal.Length)) +
+  geom_point() + 
+  geom_smooth(method="lm")
+
+ggplot(iris, aes(x=Species, y=Sepal.Length)) +
+  geom_violin()
+```
+
+```{r}
+library(rstanarm)
+```
+
+```{r}
+model <- stan_glm(Sepal.Length ~ Petal.Length + Species, data=iris)
+summary(model)
+```
+
+## Based on the Bayes Factor (BF)
+
+### Savage-Dickey density ratio
+This is the equivalent of Bayes Factor for an exact (i.e. point-restricted) hypothesis 
+
+```{r}
+# Scenario A (regular coin)
+n = 500
+k = 250
+alpha = 20
+beta = 20
+prior = distribution_beta(1000, alpha, beta)
+posterior = distribution_beta(1000, alpha+k, beta+n-k)
+
+bf_parameters(posterior,prior,null = .5) %T>% print() %>% plot()
+```
+
+### BF
+
+```{r}
+n = 500
+k = 250
+alpha = 20
+beta = 20
+
+prior = distribution_beta(1000, alpha, beta)
+posterior = distribution_beta(1000, alpha+k, beta+n-k)
+```
+
+```{r}
+# BF against negligible effect
+bf_parameters(posterior,prior,null = c(0.45,0.55)) %T>%
+    print() %>%
+    plot() + expand_limits(x=c(0,1))
+```
+
+```{r}
+bayestestR::si(posterior, prior, BF = 3) %T>% print() %>% plot() + expand_limits(x=c(0,1))
+```
+
+### Two-sample location test (BayesFactor)
+
+```{r}
+library(BayesFactor)
+```
+
+```{r}
+y1 <- c(5.77, 5.33, 4.59, 4.33, 3.66, 4.48)
+y2 <- c(3.88, 3.55, 3.29, 2.59, 2.33, 3.59)
+
+bf = ttestBF(y1,y2)
+bf
+```
+
+```{r}
+describe_posterior(bf)
+```
+
+# Informative priors
+
+Let's set a high variance normal prior:
+```{r}
+linewidth <- 1
+
+ggplot(data.frame(), aes()) +
+stat_function(fun = dnorm, args = list(sd = 10), color = "darkturquoise", size = linewidth) +
+expand_limits(x = c(-10,10)) +
+scale_x_continuous(breaks = seq(-10,10,1)) +
+labs(x = "Group difference (s)", y = "Prior distribution", title = "High variance normal prior") +
+theme(axis.text.y = element_blank())
+```
+
+Compared to a much smaller variance prior, the high variance one appears flat, and therefore non-informative:
+
+```{r}
+ggplot(data.frame(), aes()) +
+stat_function(fun = dnorm, args = list(sd = 300), color = "gold3", size = linewidth) +
+stat_function(fun = dnorm, args = list(sd = 10000), color = "darkturquoise", size = linewidth) +
+expand_limits(x = c(-1000,1000)) +
+scale_x_continuous(breaks = seq(-1000,1000,200)) +
+labs(x = "Group difference (ms)", y = "Prior distribution", title = "High vs. low variance normal priors") +
+theme(axis.text.y = element_blank())
+```
+However, as cognitive psychologists we know that differences in reaction times due to low-level mechanisms are in the order of tens of milliseconds. At the same time, we do not want the prior to assume any effect size or direction:
+```{r}
+dgamma_sym = function(x,shape,scale){dgamma(-x,shape=shape,scale=scale)}
+
+gamma_shape = 2
+gamma_scale = 40
+linewidth = 0.5
+
+ggplot(data.frame(), aes()) +
+# annotate(geom = "segment", x = -30, xend = -30, y = 0, yend = dgamma(30, shape = gamma_shape, scale = gamma_scale)) +
+stat_function(fun = dnorm, args = list(sd = 300), color = "gold3", size = linewidth) +
+stat_function(fun = dnorm, args = list(sd = 10000), color = "darkturquoise", size = linewidth) +
+stat_function(fun = dgamma, args = list(shape = gamma_shape, scale = gamma_scale),
+              xlim = c(0,500), n=1000, color = "brown1", size = linewidth) +
+stat_function(fun = dgamma_sym, args = list(shape = gamma_shape, scale = gamma_scale),
+              xlim = c(-500,0), n=1000, color = "brown1", size = linewidth) +
+annotate(geom = "rect", xmin = -10, xmax = 10, ymin = 0, ymax = Inf, fill = "black", alpha = .6) +
+expand_limits(x = c(-500,500)) +
+scale_x_continuous(breaks = seq(-500,500,100)) +
+labs(x = "Group difference (ms)", y = "Prior distribution", title = "Expert judgment vs. weakly informative priors") +
+theme(axis.text.y = element_blank())
+```
+

@@ -1,0 +1,295 @@
+---
+title: "Portfolio dashboard"
+author: "Oussama Abdoun"
+format: 
+ dashboard:
+  orientation: rows
+  logo: images/penguins.png
+  nav-buttons: [linkedin, github]
+  theme: flatly
+---
+
+## {.sidebar width="350px"}
+
+::: {.callout-note icon="false" collapse="true"}
+### Le formateur
+
+**Ingénieur généraliste et docteur en neurosciences**, je suis chercheur indépendant, consultant en méthodologie de la recherche et formateur en statistiques à destination des praticiens de la recherche.
+
+**Quinze années d'expérience de la recherche** dans des contextes scientifiques variés (electrophysiologie et pharmocologie chez l'animal, robotique, neurosciences cognitives, psychologie sociale et phénoménologie) m'ont donné une large culture de la recherche sur **le cerveau et la cognition**, et une sensibilité aux enjeux spécifiques de ces différents domaines, ce qui me permet de **comprendre très rapidement les objectifs et les questionnements** de mes interlocuteurs.
+:::
+
+::: {.callout-tip icon="false" collapse="true"}
+### L'esprit des formations
+
+Je développe et améliore continuellement mes formations en statistique **depuis 2019** auprès d'un public varié de doctorants, postdocs, chercheurs et ingénieurs de recherche lyonnais. Mes cours donnent la part belle à ce que j'aime rencontrer lorsque j'apprends moi-même : des **visualisations** et des **simulations** pour développer l'**intuition**, des **discussions** et **des mises en situation** pour stimuler la réflexion et se remettre en question.
+
+Les statistiques ne sont pas qu'affaire de mathématiques ! Dans mes cours je m'efforce de replacer la technique de l'analyse de données, parfois exigeante, dans le **contexte épistémologique et social** de la recherche scientifique.
+:::
+
+# Statistiques classiques
+
+::: {.card title="Statistiques classiques (fréquentistes)"}
+**OBJECTIFS**
+
+1. Se rappeler la motivation fondamentale des statistiques, en maîtriser les concepts fondamentaux, découvrir leur origine historique
+
+2. Comprendre la véritable signification des intervalles de confiance et des valeurs $p$ fréquentistes, apprendre à les utiliser correctement et à en identifier les mésusages
+
+3. Comprendre l'effet délétère de certains pratiques sur la reproductibilité, en découvrir de plus vertueuses
+
+-----
+
+**PROGRAMME**
+
+Chaque session dure 1/2 journée.<br>
+
+***Session 1 : estimation***
+
+-  inference, population, sampling & statistical models
+
+-  estimation: bias & variance, maximum likelihood
+
+-  confidence interval, sampling distributions & bootstrapping
+
+-  absolute & standardized effect sizes
+
+***Session 2 : test d'hypothèse***
+
+-  test d'hypothese: p-value & (mis)interpretations
+
+-  the difference between p-value & p(H\|y)
+
+-  error type I & II
+
+-  calculation of statistical power (determining an effect size, literature vs. piloting)
+
+***Session 3 : bonnes pratiques pour la reproductibilité***
+
+-  prevalence & consequences of low statistical power
+
+-  base rate of true hypotheses & posterior positive rate
+
+-  error types M & S, publication bias
+
+-  questionable research practices & good practices for reproducibility
+
+-----
+
+**Tarif :** 2100€ + frais de déplacement
+
+:::
+
+# Statistiques bayésiennes
+
+::: {.card title="Statistiques bayésiennes"}
+**OBJECTIFS**
+
+1. Comprendre les concepts et la mécanique de base des statistiques bayésiennes, et ce qui les distingue de l'approche fréquentiste
+
+2. Comprendre les rôles des priors et apprendre à les specifier de façon argumentée
+
+3. Découvrir les différentes méthodes d'inférence bayésienne et savoir les interpréter
+
+4. Apprendre à évaluer, diagnostiquer et rapporter une analyse bayésienne 
+
+-----
+
+**PROGRAMME**
+
+Chaque session dure 1/2 journée.<br>
+
+***Session 1 : rappel sur les statistiques fréquentistes***
+
+Voir ci-dessus le programme des deux premières sesssions du cours sur les statistiques classiques.
+
+***Session 2 : introduction aux statistiques bayésiennes***
+
+-  Elements of probability theory, Bayes law
+
+-  Bayesian estimation
+
+-  Numerical simulation of posterior distributions
+
+-  Priors: non-informative priors, eliciting informative priors
+
+***Session 3 : approches bayésiennes aux tests d'hypothèses***
+
+-  Posterior-based hypothesis testing
+
+-  Bayes factors, model comparison, default Bayes factors
+
+-  Bayesian model averaging
+
+***Session 4 : approches bayésiennes aux tests d'hypothèses***
+
+-  Properties of bayesian analysis: bias-variance tradeoff & regularization, multiple comparisons, optional stopping
+
+-  The bayesian workflow: prior & posterior predictive checks, MCMC diagnostics
+
+-  Reporting bayesian analyses: guidelines, common mistakes & misinterpretations
+
+***Session 5 : démonstration dans JASP***
+
+T-tests, régression multiple, ANOVA avec ou sans mesures répétées.
+
+***Session 6 : démonstration dans R***
+
+-  With the package `{BayesFactor}`: t-tests, régression multiple, ANOVA, modèles mixtes.
+
+-  With the package `{rstanarm}`: modèles mixtes, diagnostic des MCMC
+
+-----
+
+**Tarif :** 4200€ + frais de déplacement
+
+:::
+
+# Modèles statistiques
+
+::: {.card title="Modélisation linéaire"}
+**OBJECTIFS**
+
+1. Comprendre le lien entre test et modèle statistiques
+
+2. Savoir spécifier le modèle le plus approprié pour son design expérimental, ses données et ses questions scientifiques
+
+3. Savoir interpréter les différents paramètres d'un modèle et les résultats de son ajustement aux données
+
+**Pre-requisite:** basic jnowledge in analysis, algebra, and probability theory
+
+-----
+
+**PROGRAMME**
+
+Chaque session dure 1/2 journée.<br>
+
+***Session 1 : linear modeling***
+
+-  Common tests as linear models: correlation, t-tests, chi-square test, non-parametric tests
+
+-  Model fitting: OLS, assumptions, diagnostics
+
+-  ANOVAs: factor coding, hypothesis testing
+
+-  Interactions: coding, post hoc tests
+
+***Session 2 : advanced linear modeling***
+
+-  Generalized models: binomial, poisson, Gamma, ordinal, zero-inflation
+
+-  Penalized estimation: lasso & ridge regressions 
+
+-  Time domain analysis with autoregressive models
+
+***Session 3 : hierarchical modeling with mixed models (LMM)***
+
+-  Motivations
+
+-  General structure: non-independence, hierarchy, nested and crossed designs
+
+-  Hypothesis testing
+
+-  Debugging, model specification
+
+***Session 4 : non-linear modeling with generalized additive models (GAM)***
+
+-  Basic concepts: smooths, penalization
+
+-  Model specification: non-standard smooths, random effects, autocorrelation
+
+-  Model fitting: optimization, diagnostics
+
+-  *Post hoc* tests, visualization
+
+:::
+
+# R
+
+## Row {.tabset}
+
+::: {.card title="R pour les débutants"}
+**OBJECTIFS**
+
+1. Découvrir l'ecosystème de R
+
+2. Apprendre les bases de la programmation et de l'algorithmique dans R
+
+3. Apprendre à explorer et analyser ses données de façon descriptive et inférentielle
+
+------------------------------------------------------------------------
+
+**PROGRAMME**
+
+Chaque session dure 1/2 journée.<br>
+
+***Session 1 : basics of R programming***
+
+-  The R ecosystem: R, RStudio, CRAN, installing packages, Rmarkdown/Quarto documents
+
+-  base R: objects & data types, conditional statements, loops, control flow
+
+***Session 2 : tidy R***
+
+"Tidyness" is a fundamental concept in modern R, designed to facilitate the writing, enhance the readability and increase the robustness of R code for data analysis.
+
+-  data manipulation: theory with tidy dataframes, application with `{tidyverse}`
+
+-  data visualization: theory with the grammar of graphics, application with `{ggplot2}`, representing uncertainty
+
+***Session 3 : statistical analysis***
+
+-  common statistical tests: correlations, $t$-tests, linear regression, (rm)-AN(C)OVAs
+
+-  high-level statistical workflow with `{easystats}`
+:::
+
+::: {.card title="R for experienced users"}
+**OBJECTIFS**
+
+1. Enrichir son répertoire d'outils pour la représentation visuelle des résultats
+
+2. Exploiter le potentiel de la programmation pour être plus efficace et élargir le champ de ses possibilités
+
+3. Maîtriser les outils et les pratiques permettant d'améliorer la transparence, la reproductibilité et la réutilisation de son travail d'analyse
+
+**Prerequisites:** experience with `{tidyverse}` and `{ggplot2}`
+
+------------------------------------------------------------------------
+
+**PROGRAMME**
+
+Chaque session dure 1/2 journée.<br>
+
+***Session 1 : advanced data visualization***
+
+-  visualizing sophisticated datasets: within-subject data, high dimensional data, network data
+
+-  color management: theory, colorblindness & bivariate colormaps with `{pals}`
+
+-  publication-ready figures: advanced customization with `{ggh4x}`, statistical significance `{ggpubr}`, subplotting with `{patchwork}`
+
+***Session 2 : advanced programming***
+
+-  functional programming
+
+-  object-oriented programming
+
+-  reproducibility & transparency: github, Quarto, `{renv}`
+
+***Session 3: Quarto***
+
+-  authoring: markdown, figures, equations, citations, cross-references, layout
+
+-  using Quarto documents for sharing: cache, publication
+
+-  using Quarto documents for reproducible manuscripts: LaTeX, inline quoting, citations
+
+-  beyond static documents: Quarto presentations & interactive dashboards
+
+------------------------------------------------------------------------
+:::
+
+# JASP
+
+JASP (1 day, 900e + living costs)Morning- data wrangling (manipulation & transformation)- data visualization: theory, tools in JASP- common statistical testsAfternoon- modeling: linear regression, ANOVA, repeated measures, mixed models- statistical power calculation

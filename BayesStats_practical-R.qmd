@@ -1,0 +1,592 @@
+---
+title: "TD bayesian analysis"
+author: "Oussama Abdoun"
+format: html
+editor: visual
+---
+
+# Libraries
+
+```{r}
+library(BayesFactor)
+library(rstanarm)
+library(brms)
+
+library(bayestestR)
+library(bayesplot)
+library(tidybayes)
+
+library(tictoc)
+
+library(tidyverse)
+
+theme_set(theme_minimal())
+
+emm_options(emmeans = list(type = "response"),
+            contrast = list(infer = c(TRUE, TRUE)))
+```
+
+# The `BayesFactor` package
+
+## One-sample location test
+
+### Data
+
+```{r}
+?sleep
+sleep
+diff.sleep <- sleep$extra[1:10] - sleep$extra[11:20]
+```
+
+### Frequentist vs. Bayesian
+
+```{r}
+t.test(diff.sleep)
+
+tic()
+bf.tt <- ttestBF(diff.sleep)
+toc()
+
+bf.tt
+
+plot(bf.tt)
+```
+
+Notes: - the computation of the BF is super fast because it does not require MCMC in this setting, and relies instead on "Gaussian quadrature" - an alternative to the one-sample t-test, is the paired two-sample test: `r bf <- ttestBF(sleep$extra[1:10], sleep$extra[11:20], paired = TRUE)`
+
+### Interval hypotheses
+
+#### Interval null
+
+```{r}
+bf.interval0 <- ttestBF(diff.sleep, nullInterval = c(-0.1,0.1))
+bf.interval0
+
+bf.interval0[1] / bf.interval0[2]
+
+bf.interval0[2] / bf.interval0[1]
+
+plot(bf.interval0)
+```
+
+#### Direction of effect
+
+```{r}
+bf.direction <- ttestBF(diff.sleep, nullInterval = c(-Inf,0))
+bf.direction
+
+bf.direction[1] / bf.direction[2]
+```
+
+### Sampling the posterior
+
+#### MCMC diagnostics
+
+```{r}
+tic()
+chain <- BayesFactor::posterior(bf.tt, iterations = 1000)
+toc()
+head(chain, 10)
+summary(chain)
+
+plot(chain[,c(1,3)])
+```
+
+Unfortunately, diagnostic functions from `bayestestR` do not support BayesFactor models:
+
+```{r}
+bayestestR::diagnostic_posterior(bf.tt)
+```
+
+#### 
+
+#### Estimates & posterior-based inference using `bayestestR`
+
+```{r}
+bayestestR::describe_posterior(bf.tt, rope_range = c(-1/12, 1/12))
+```
+
+### Prior variance: sensitivity analysis
+
+```{r}
+bf.medium <- ttestBF(diff.sleep, rscale = "medium")
+bf.wide <- ttestBF(diff.sleep, rscale = "wide")
+bf.ultrawide <- ttestBF(diff.sleep, rscale = "ultrawide")
+
+bf.priors <- c(bf.medium, bf.wide, bf.ultrawide)
+
+plot(bf.priors, sortbf = FALSE)
+```
+
+## Two-way ANOVA
+
+### Data
+
+```{r}
+?ToothGrowth
+ToothGrowth
+
+# Treat dose as a factor
+ToothGrowth$dose = factor(ToothGrowth$dose)
+levels(ToothGrowth$dose) = c("Low", "Medium", "High")
+levels(ToothGrowth$dose) = c(0.5,1,2)
+```
+
+### Plot
+
+```{r}
+#| fig.width: 4
+#| fig.height: 2
+
+ToothGrowth %>% 
+  ggplot(aes(x = dose, y = len, color = supp)) +
+  geom_point(position = position_jitterdodge(jitter.height = 0, dodge.width = .5))
+```
+
+### Frequentist vs. Bayesian
+
+Note: if you get an error such as `invalid object of class “ddenseModelMatrix”`, you might need to re-install the `{MatrixModels}` package from source: `install.packages("MatrixModels", type = "source")`
+
+```{r}
+summary(aov(len ~ supp*dose, data = ToothGrowth))
+
+tic()
+bf.aov <- anovaBF(len ~ supp*dose, data = ToothGrowth)
+toc()
+
+bf.aov
+
+plot(bf.aov)
+```
+
+For this type of model, the BF is estimated from MCMC. Therefore, there will be variations of BF across repetitions of the model fitting, the amplitude of which is estimated by the error figure:
+
+```{r}
+bf.aov2 <- anovaBF(len ~ supp*dose, data = ToothGrowth)
+bf.aov; bf.aov2
+```
+
+### BF for interaction
+
+```{r}
+bf.aov[4] / bf.aov[3] -> bf.aov.inter
+bf.aov.inter
+
+tic()
+bf.aov <- recompute(bf.aov, iterations = 100000)
+toc()
+
+bf.aov.inter
+```
+
+### Post hoc tests
+
+```{r}
+library(emmeans)
+
+emm_options(emmeans = list(infer = c(T,T)))
+
+m.aov.freq <- aov(len ~ supp*dose, data = ToothGrowth)
+emmeans(m.aov.freq, pairwise ~ supp|dose, infer = c(T,T))$contrasts
+
+emmeans(m.aov.freq, pairwise ~ dose|supp, infer = c(T,T))$contrasts
+
+# emmeans(m.aov.freq, ~ dose*supp) %>% contrast()
+
+for (dd in c(0.5,1,2)) {
+  df.dd <- ToothGrowth %>% filter(dose==dd) 
+  cat("DOSE = ", dd, "\n")
+  ttestBF(filter(df.dd, supp == "VC")$len, filter(df.dd, supp == "OJ")$len) %>% print
+}
+```
+
+## Repeated measure ANOVA
+
+### Data
+
+```{r}
+?puzzles
+data(puzzles)
+```
+
+### Plot
+
+```{r}
+#| fig.width: 5
+#| fig.height:2
+
+puzzles %>% 
+  ggplot(aes(x = shape, y = RT, fill = color, group = interaction(shape,color))) +
+  geom_violin(position = position_dodge(.5), width = 0.7) +
+  geom_boxplot(position = position_dodge(.5), width = 0.2, fill = "white")
+```
+
+### Frequentist vs. Bayesian
+
+```{r}
+summary(aov(RT ~ shape*color + Error(ID/(shape*color)), data=puzzles))
+
+tic()
+bf.rmaov <- anovaBF(RT ~ shape*color + ID, data = puzzles, whichRandom="ID")
+toc()
+
+bf.rmaov
+```
+
+### BF for interaction
+
+```{r}
+bf.rmaov[4] / bf.rmaov[3] -> bf.rmaov.inter
+
+bf.rmaov.inter
+
+1/bf.rmaov.inter
+```
+
+### BF for all effects
+
+```{r}
+bf.rmaov[3] / bf.rmaov[2]
+bf.rmaov[3] / bf.rmaov[1]
+
+bf.rmaov.fx <- anovaBF(RT ~ shape*color + ID, data = puzzles, whichRandom="ID", whichModels = "top")
+
+bf.rmaov.fx
+1/bf.rmaov.fx
+```
+
+## Linear regression: variable selection
+
+### Data
+
+```{r}
+?airquality
+
+df.aq <- airquality %>%
+  # mutate(Summer = as.factor(as.numeric(Month >= 7 & Month <= 8))) %>% 
+  drop_na()
+
+df.aq
+```
+
+### Frequentist vs. Bayesian
+
+`regressionBF()` accepts only continuous predictors. Use ``` generalTestBF``() ``` for a mix of continuous and categorical predictors and for interactions.
+
+```{r}
+summary(lm(data = df.aq, Ozone ~ Temp + Wind + Solar.R))
+
+bf.reg <- regressionBF(Ozone ~ Temp * Wind + Solar.R, data = df.aq)
+
+bf.reg
+
+plot(bf.reg)
+```
+
+### Variable selection: stepwise
+
+```{r}
+bf.reg.topdown <- regressionBF(Ozone ~ Temp + Wind + Solar.R, data = df.aq, whichModels = "top")
+bf.reg.topdown
+plot(bf.reg.topdown)
+
+bf.reg.bottomup <- regressionBF(Ozone ~ Temp + Wind + Solar.R, data = df.aq, whichModels = "bottom")
+bf.reg.bottomup
+plot(bf.reg.bottomup)
+```
+
+### Variable selection: Bfinclusion
+
+The $BF_{incl}$ of a predictor $X$ is the average of BF of all models that include X, weighted by their respective posterior probability.
+
+??? how many predictors / observations ???
+
+??? MCMC convergence when predictors \~ / \>\> observations ???
+
+??? model-averaged posterior ???
+
+```{r}
+plot(bf.reg)
+
+bayestestR::bf_inclusion(bf.reg)
+```
+
+# The \`rstanarm\` package
+
+## Linear mixed model
+
+### Data
+
+```{r}
+df.compassion <- read_tsv(file = "CAAT_data_cleaned_self-reports.tsv") %>% 
+  filter(condition == "Compassion",
+         stimtype == "Emotional") %>% 
+  mutate(across(c("subject","videoname","context"), as.factor))
+
+df.compassion
+```
+
+### Frequentist
+
+```{r}
+#| fig.width: 6
+#| fig.height: 10
+
+library(lme4)
+library(lmerTest)
+
+m.help.lmer <- lmer(help ~ group*context + (1 + context|subject) + (1|videoname),
+                    df.compassion)
+
+# From easystats:
+performance::check_model(m.help.lmer)
+
+summary(m.help.lmer)
+car::Anova(m.help.lmer)
+
+```
+
+### Bayesian
+
+#### Default priors
+
+```{r}
+m.help.default <- stan_lmer(help ~ group*context + (1|subject),
+                            data = df.compassion,
+                            prior_PD = TRUE,
+                            refresh = 200)
+
+prior_summary(m.help.default)
+
+# Thick line = 50% HPD, thin line = 90% (?) HPD
+plot(m.help.default, pars = "beta")
+
+pp_check(m.help.default)
+
+```
+
+#### Custom priors
+
+```{r}
+m.help.custom.pd <- stan_lmer(help ~ group*context + (1|subject),
+                              data = df.compassion,
+                              prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                              prior_PD = TRUE,
+                              refresh = 0)
+
+prior_summary(m.help.custom.pd)
+
+plot(m.help.custom.pd, pars = "beta")
+
+pp_check(m.help.custom.pd)
+```
+
+### Fit model
+
+```{r}
+tic()
+m.help.custom <- stan_lmer(help ~ group*context + (1|subject),
+                           data = df.compassion,
+                           prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                           cores = 1,
+                           refresh = 0)
+toc()
+
+prior_summary(m.help.custom)
+
+plot(m.help.custom, pars = "beta")
+
+pp_check(m.help.custom)
+
+posterior_vs_prior(m.help.custom, pars = "beta")
+```
+
+```{r}
+
+tic()
+m.help.custom <- stan_lmer(help ~ group*context + (1|subject),
+                            data = df.compassion,
+                            prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                            cores = 4,
+                            refresh = 0,
+                            diagnostic_file = file.path(tempdir(), "tmp1.csv"))
+toc()
+
+
+tic()
+m.help.custom2 <- stan_lmer(help ~ group*context + (1|subject) + (1|videoname),
+                            data = df.compassion,
+                            prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                            cores = 4,
+                            refresh = 0,
+                            diagnostic_file = file.path(tempdir(), "tmp2.csv"))
+toc()
+
+
+tic()
+m.help.custom3 <- stan_lmer(help ~ group*context + (1 + context|subject) + (1|videoname),
+                            data = df.compassion,
+                            prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                            cores = 4,
+                            refresh = 0,
+                            diagnostic_file = file.path(tempdir(), "tmp3.csv"))
+toc()
+
+
+tic()
+m.help.custom4 <- stan_lmer(help ~ group*context + (1 + context|subject) + (1 + context|videoname),
+                            data = df.compassion,
+                            prior = normal(location = 0, scale = 1, autoscale = TRUE),
+                            cores = 4,
+                            refresh = 0,
+                            diagnostic_file = file.path(tempdir(), "tmp4.csv"))
+toc()
+```
+
+#### Diagnostics
+
+```{r}
+launch_shinystan(m.help.custom2)
+```
+
+### Inference
+
+#### Compare models
+
+```{r}
+bayestestR::bf_models(m.help.custom,
+                      m.help.custom2,
+                      m.help.custom3,
+                      m.help.custom4)
+```
+
+```{r}
+describe_posterior(m.help.custom)
+```
+
+#### Post hoc tests
+
+```{r}
+library(emmeans)
+
+emm.bycontext <- emmeans(m.help.custom, pairwise ~ group | context)$contrasts
+emm.bycontext
+
+bayesplot::mcmc_areas(as.mcmc(emm.bycontext)) + geom_vline(xintercept = 0, linetype = 2) 
+
+emm.bygroup <- emmeans(m.help.custom, pairwise ~ context | group)$contrasts
+emm.bygroup
+bayesplot::mcmc_areas(as.mcmc(emm.bygroup)) + geom_vline(xintercept = 0, linetype = 2) 
+
+bayestestR::bf_parameters(posterior = emmeans(m.help.custom, pairwise ~ group | context)$contrasts,
+                          prior = emmeans(m.help.custom.pd, pairwise ~ group | context)$contrasts)
+
+bayestestR::bf_parameters(posterior = emm.bygroup,
+                          prior = emmeans(m.help.custom.pd, pairwise ~ context | group)$contrasts)
+```
+
+The complicated way (see https://cran.r-project.org/web/packages/emmeans/vignettes/sophisticated.html#mcmc):
+
+```{r}
+rg.help <- ref_grid(m.help.custom)
+rg.help
+
+summary(rg.help)
+summary(pairs(rg.help))
+
+bayestestR::bf_parameters(posterior = pairs(rg.help),
+                          prior = pairs(ref_grid(m.help.custom.pd)))
+
+bayesplot::mcmc_areas(as.mcmc(pairs(rg.help)))
+```
+
+## Generalized mixed model
+
+### Data
+
+```{r}
+df.aat <- read_tsv(file = "CAAT_data_cleaned_aat.tsv") %>% 
+  filter(stimtype == "Emotional",
+         cue == "Approach",
+         response == "correct") %>% 
+  mutate(rt = rt / 1000) %>% 
+  mutate(across(c("subject","videoname","context"), as.factor))
+
+df.aat
+```
+
+### Frequentist
+
+```{r}
+#| fig.width: 6
+#| fig.height: 10
+
+m.aat.glmer.gam <- glmer(rt ~ group*context + (1 + context|subject) + (1 + context|videoname),
+                         df.aat, family = Gamma("identity"))
+summary(m.aat.glmer.gam)
+
+performance::check_model(m.aat.glmer.gam)
+
+m.aat.glmer.inv <- glmer(rt ~ group*context + (1 + context|subject) + (1 + context|videoname),
+                         df.aat, family = inverse.gaussian("identity"))
+summary(m.aat.glmer.inv)
+
+performance::check_model(m.aat.glmer.inv)
+```
+
+### Bayesian
+
+#### Default priors
+
+```{r}
+m.aat.default <- stan_glmer(rt ~ group*context + (1|subject) + (1|videoname),
+                            data = df.aat,
+                            family = Gamma("identity"),
+                            prior_PD = TRUE,
+                            refresh = 0)
+
+prior_summary(m.aat.default)
+
+plot(m.aat.default, pars = "beta")
+
+pp_check(m.aat.default)
+
+```
+
+#### Custom priors
+
+```{r}
+m.aat.custom.pd <- stan_glmer(rt ~ group*context + (1|subject) + (1|videoname),
+                              data = df.aat,
+                              family = Gamma("identity"),
+                              prior = normal(location = 0, scale = 0.200, autoscale = FALSE),
+                              prior_PD = TRUE,
+                              refresh = 0)
+
+prior_summary(m.aat.custom.pd)
+
+plot(m.aat.custom.pd, pars = "beta")
+
+pp_check(m.aat.custom.pd)
+```
+
+### Fit model
+
+```{r}
+tic()
+m.aat.custom <- stan_glmer(rt ~ group*context + (1|subject) + (1|videoname),
+                           data = df.aat,
+                           family = Gamma("identity"),
+                           prior = normal(location = 0, scale = 0.200, autoscale = F),
+                           cores = 4,
+                           refresh = 0)
+toc()
+
+prior_summary(m.aat.custom)
+
+plot(m.aat.custom, pars = "beta")
+
+pp_check(m.aat.custom)
+
+posterior_vs_prior(m.aat.custom, pars = "beta")
+```
