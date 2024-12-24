@@ -20,16 +20,16 @@ citations-hover: false
 
 ### Télécharger
 
-Tous les fichiers (\~50mb):
+Tous les fichiers (\~14MB): \[[zip](https://ousabd.github.io/stats-bayes/BayesStats_CRNL2024_all-files.zip)\]   
 
-Part 1: Classical / frequentist statistics \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_1of4.pdf)\] 
-Part 2: Core concepts & parameter estimation \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_2of4.pdf)\] 
-Part 3: Hypothesis testing \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_3of4.pdf)\] 
-Part 4: Performance, model evaluation, reporting \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_4of4.pdf)\]
+Part 1: Classical / frequentist statistics \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_1of4.pdf)\]  
+Part 2: Core concepts & parameter estimation \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_2of4.pdf)\]  
+Part 3: Hypothesis testing \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_3of4.pdf)\]  
+Part 4: Performance, model evaluation, reporting \[[pdf](https://ousabd.github.io/stats-bayes/pdf/BayesStats_CRNL2024_4of4.pdf)\]  
 
-Code for bayesian statistics: \[[html](https://ousabd.github.io/stats-bayes/code/BayesStats_code.html)\] \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_code.qmd)\]
+Code for bayesian statistics: \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_code.qmd)\] \[[html](https://ousabd.github.io/stats-bayes/code/BayesStats_code.html)\]
 
-Practice in R: \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_practical-R.qmd)\] \[[data](https://ousabd.github.io/stats-bayes/code/data/BayesStats_practical-R_data.zip)\]
+Practice in R: \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_practical-R.qmd)\] \[[data](https://ousabd.github.io/stats-bayes/data/BayesStats_practical-R_data.zip)\]
 
 
 
