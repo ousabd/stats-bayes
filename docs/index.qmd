@@ -21,8 +21,8 @@ citations-hover: false
 ### Télécharger
 
 Tous les fichiers (\~50mb):
-
-Part 1: Classical / frequentist statistics \[[pdf](#0)\] \[[code](#0)\]\
+\[[pdf](https://gitlab.com/ousabd/statscourse2023/-/raw/master/1.01_statistical-inference/1.01.pdf)\]
+Part 1: Classical / frequentist statistics \[[pdf](https://github.com/ousabd/stats-bayes/blob/main/docs/pdf/BayesStats_CRNL2024_1of4.pdf)\] \[[code](#0)\]\
 Part 2: Core concepts & parameter estimation \[[pdf](#0)\] \[[code](#0)\]\
 Part 3: Hypothesis testing \[[pdf](#0)\] \[[code](#0)\]\
 Part 4: Performance, model evaluation, reporting \[[pdf](#0)\] \[[code](#0)\]
