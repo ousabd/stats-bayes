@@ -51,6 +51,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#télécharger" id="toc-télécharger" class="nav-link" data-scroll-target="#télécharger">Télécharger</a></li>
   <li><a href="#historique-des-modifications" id="toc-historique-des-modifications" class="nav-link" data-scroll-target="#historique-des-modifications">Historique des modifications</a></li>
   </ul></li>
+  <li><a href="#et-maintenant" id="toc-et-maintenant" class="nav-link" data-scroll-target="#et-maintenant">Et maintenant ?</a></li>
   <li><a href="#ressources-recommandées" id="toc-ressources-recommandées" class="nav-link" data-scroll-target="#ressources-recommandées">Ressources recommandées</a></li>
   <li><a href="#remerciements" id="toc-remerciements" class="nav-link" data-scroll-target="#remerciements">Remerciements</a></li>
   <li><a href="#contact" id="toc-contact" class="nav-link" data-scroll-target="#contact">Contact</a></li>
@@ -117,6 +118,21 @@ Part 4: Performance, model evaluation, reporting [<a href="https://ousabd.github
 </ul>
 </section>
 </section>
+</section>
+<section id="et-maintenant" class="level2">
+<h2 class="anchored" data-anchor-id="et-maintenant">Et maintenant ?</h2>
+<p>Le cours n’était qu’une introduction, que vous pouvez approfondir à travers de nombreuses <a href="https://ousabd.github.io/stats-bayes/#ressources-recommand%C3%A9es">lectures recommandées</a>.</p>
+<p>Mais vous pouvez aussi commencer à appliquer ce que vous avez appris dès maintenant !</p>
+<p>Quelques idées, en commençant par les plus accessibles :</p>
+<ul>
+<li><p>Appréhender les résultats des statistiques fréquentistes avec plus de mesure.</p></li>
+<li><p>Interpréter correctement et avec un oeil critique les statistiques bayésiennes que vous rencontrez dans la littérature.</p></li>
+<li><p>Guider vos étudiant.e.s dans la réalisation et l’interprétation d’analyses bayésiennes.</p></li>
+<li><p>Critiquer et améliorer la methodologie bayésienne dans les manuscrits que vous reviewez.</p></li>
+<li><p>Publier vos résultats négatifs en valorisant au maximum vos données (évidence insuffisante ou en faveur de l’hypothèse nulle, intervalles d’incertitude intuitifs…).</p></li>
+<li><p>Doubler vos analyses fréquentistes d’un “deuxième son de cloche”, qui met l’accent sur l’estimation et l’incertitude des paramètres / tailles d’effet.</p></li>
+<li><p>Fitter des modèles complexes qui convergent mal en fréquentiste.</p></li>
+</ul>
 </section>
 <section id="ressources-recommandées" class="level2">
 <h2 class="anchored" data-anchor-id="ressources-recommandées">Ressources recommandées</h2>
@@ -240,6 +256,7 @@ Part 4: Performance, model evaluation, reporting [<a href="https://ousabd.github
 <section id="contact" class="level2">
 <h2 class="anchored" data-anchor-id="contact">Contact</h2>
 <p>N’hésitez pas à me contacter si vous trouvez des erreurs dans les slides, souhaitez organiser d’autres formations, etc.</p>
+<p>Vous trouverez un descriptif détaillé de toutes les formations que je peux proposer ici : <a href="https://ousabd.github.io/teaching-stats-portfolio/">portfolio des formations</a></p>
 <p>oussama [dot] abdoun (@) pm [dot] com</p>
 </section>
 
@@ -337,7 +354,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("^$");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }

@@ -6,6 +6,7 @@ format:
   html:
     toc: true
     link-external-newwindow: true
+    link-external-filter: "^$"
     theme: cosmo
     
 editor: visual
@@ -47,6 +48,30 @@ Practice in R: \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_pra
 
 -   part 3: added a visualization of the convergence of MCMC towards the posterior distribution (slide #4) and the stability of credibility intervals (slide #6)
 -   part 2: added a quote on subjectivity in statistics (slide #49)
+
+
+## Et maintenant ?
+
+Le cours n'était qu'une introduction, que vous pouvez approfondir à travers de nombreuses [lectures recommandées](https://ousabd.github.io/stats-bayes/#ressources-recommand%C3%A9es).
+
+Mais vous pouvez aussi commencer à appliquer ce que vous avez appris dès maintenant ! 
+
+Quelques idées, en commençant par les plus accessibles :
+
+- Appréhender les résultats des statistiques fréquentistes avec plus de mesure.
+
+- Interpréter correctement et avec un oeil critique les statistiques bayésiennes que vous rencontrez dans la littérature.
+
+- Guider vos étudiant.e.s dans la réalisation et l'interprétation d'analyses bayésiennes.
+
+- Critiquer et améliorer la methodologie bayésienne dans les manuscrits que vous reviewez.
+
+- Publier vos résultats négatifs en valorisant au maximum vos données (évidence insuffisante ou en faveur de l'hypothèse nulle, intervalles d'incertitude intuitifs...).
+
+- Doubler vos analyses fréquentistes d'un "deuxième son de cloche", qui met l'accent sur l'estimation et l'incertitude des paramètres / tailles d'effet.
+
+- Fitter des modèles complexes qui convergent mal en fréquentiste.
+
 
 ## Ressources recommandées
 
@@ -184,8 +209,11 @@ Dans chaque liste, les ressources/références sont présentées dans un **ordre
 
 -   **Romain Bouet** pour son accompagnement dans mes premiers pas en statistiques en 2015-2017, et pour les innombrables conversations statistiques (ou pas) qui ont alimenté ma réflexion depuis
 
+
 ## Contact
 
 N'hésitez pas à me contacter si vous trouvez des erreurs dans les slides, souhaitez organiser d'autres formations, etc.
+
+Vous trouverez un descriptif détaillé de toutes les formations que je peux proposer ici : [portfolio des formations](https://ousabd.github.io/teaching-stats-portfolio/)
 
 oussama \[dot\] abdoun (\@) pm \[dot\] com
