@@ -54,9 +54,7 @@ Practice in R: \[[.qmd](https://ousabd.github.io/stats-bayes/code/BayesStats_pra
 
 Le cours n'était qu'une introduction, que vous pouvez approfondir à travers de nombreuses [lectures recommandées](https://ousabd.github.io/stats-bayes/#ressources-recommand%C3%A9es).
 
-Mais vous pouvez aussi commencer à appliquer ce que vous avez appris dès maintenant ! 
-
-Quelques idées, en commençant par les plus accessibles :
+Mais vous pouvez aussi commencer à appliquer ce que vous avez appris dès maintenant ! Voici quelques idées, en commençant par les plus accessibles :
 
 - Appréhender les résultats des statistiques fréquentistes avec plus de mesure.
 
@@ -205,7 +203,7 @@ Dans chaque liste, les ressources/références sont présentées dans un **ordre
 
 -   **Anne Cheylus** pour l'initiative de ce cours et toute son organisation de A à Z !
 
--   la **direction du CRNL**, et en particulier Anne-Marie Helle, pour leur soutien administratif et financier
+-   la **direction du CRNL** pour leur soutien administratif et financier
 
 -   **Romain Bouet** pour son accompagnement dans mes premiers pas en statistiques en 2015-2017, et pour les innombrables conversations statistiques (ou pas) qui ont alimenté ma réflexion depuis
 
